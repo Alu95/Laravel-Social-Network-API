@@ -16,3 +16,6 @@ Route::get('/', function () {
         'status' => 'true'
     ]);
 });
+Route::get('/check', function () {
+    return view('/check/check', ['name' => 'James']);
+});
