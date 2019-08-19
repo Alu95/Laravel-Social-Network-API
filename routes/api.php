@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 Route::group(['prefix' => '/auth', ['middleware' => 'throttle:20,5']], function() {
     Route::post('/register', 'Auth\RegisterController@register');
-    Route::post('/login', 'Auth\loginController@login');
+    Route::post('/login', 'Auth\LoginController@login');
 });
 
 /*
@@ -28,13 +28,14 @@ Route::group(['middleware' => 'jwt.auth'], function() {
     Route::get('/me', 'MeController@index');
     Route::get('/auth/logout', 'MeController@logout');
     //voting
-    Route::get('/vote', 'postsController@vote');
-    Route::get('/num_votes', 'postsController@countVotes');
+    Route::get('/vote', 'PostsController@vote');
+    Route::get('/num_votes', 'PostsController@countVotes');
     //posting
-    Route::post('/send_post', 'postsController@publishPost');
-    Route::post('/update_post', 'postsController@updatePost');
+    Route::post('/send_post', 'PostsController@publishPost');
+    Route::post('/update_post', 'PostsController@updatePost');
     //hashtag
     
 });
 
 Route::get('/posts', 'PostsController@show');
+Route::get('/test', 'PostsController@index');

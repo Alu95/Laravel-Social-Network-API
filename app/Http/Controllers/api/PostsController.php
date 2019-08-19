@@ -8,7 +8,7 @@ use Tymon\JWTAuth\JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use App\Models\Postlists;
+use App\Models\PostLists;
 use App\Models\Votes;
 use Tymon\JWTAuth\JWTAuth as TymonJWTAuth;
 
@@ -19,7 +19,7 @@ class PostsController extends Controller
     {
         $this->auth = $auth;
     }
-    
+
     public function index(Request $request)
     {
         $userData = $request->user();
@@ -121,7 +121,7 @@ class PostsController extends Controller
             $data['value'] === "1"
             || $data['value'] === "0"
             && $request->input('id')
-            ) 
+            )
         {
             $check['id_post'] = $request->input('id');
             $check['id_voter'] = $request->user()->id;
@@ -178,7 +178,7 @@ class PostsController extends Controller
             ->where('id_voter', $data['id_voter'])
             ->update(['vote_type' => $data['value']]);
     }
-    
+
     public function countVotes(Request $request)
     {
         $upVotes = Votes::where('id_post', $request->input('id'))
@@ -193,8 +193,8 @@ class PostsController extends Controller
             'up_votes' => $upVotes,
             'down_votes' => $downVotes
         ]);
-        
+
     }
 
-    
+
 }
