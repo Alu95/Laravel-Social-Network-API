@@ -19,8 +19,8 @@ class CreatePostsTable extends Migration
             $table->string('user_id');
             $table->string('user_name');
             $table->string('message',240);
-            $table->bigInteger('up_votes');
-            $table->bigInteger('down_votes');
+            $table->bigInteger('up_votes')->default(0);
+            $table->bigInteger('down_votes')->default(0);
             $table->timestamps();
         });
     }

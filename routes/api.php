@@ -38,4 +38,6 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 });
 
 Route::get('/posts', 'PostsController@show');
-Route::get('/test', 'PostsController@index');
+Route::get('/test', 'HashtagController@test');
+Route::get('/test2', 'HashtagController@parse');
+Route::get('/hash', 'HashtagController@index');

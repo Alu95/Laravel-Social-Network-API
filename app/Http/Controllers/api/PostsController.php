@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\DB;
 use App\Models\PostLists;
 use App\Models\Votes;
 use Tymon\JWTAuth\JWTAuth as TymonJWTAuth;
+use Illuminate\Support\Facades\App;
+use League\CommonMark;
+
 
 class PostsController extends Controller
 {
@@ -196,5 +199,10 @@ class PostsController extends Controller
 
     }
 
+    public function testTags() 
+    {
+
+
+    }
 
 }
