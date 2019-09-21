@@ -30,6 +30,7 @@ Route::group(['middleware' => 'jwt.auth'], function() {
     //voting
     Route::get('/vote', 'PostsController@vote');
     Route::get('/num_votes', 'PostsController@countVotes');
+    Route::get('/all_votes', 'PostsController@allVotes');
     //posting
     Route::post('/send_post', 'PostsController@publishPost');
     Route::post('/update_post', 'PostsController@updatePost');
@@ -38,6 +39,10 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 });
 
 Route::get('/posts', 'PostsController@show');
-Route::get('/test', 'HashtagController@test');
-Route::get('/test2', 'HashtagController@parse');
+//tags working
+Route::get('/top_tags', 'HashtagController@topTags');
+//tags deprecated
+Route::get('/test2', 'HashtagController@registerTags');
 Route::get('/hash', 'HashtagController@index');
+//votes testing
+Route::get('/votes', 'VoteController@votesPerPost');

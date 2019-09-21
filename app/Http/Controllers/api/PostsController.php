@@ -8,12 +8,14 @@ use Tymon\JWTAuth\JWTAuth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use App\Models\PostLists;
+use App\Models\Post;
 use App\Models\Votes;
+use App\Models\Tags;
 use Tymon\JWTAuth\JWTAuth as TymonJWTAuth;
 use Illuminate\Support\Facades\App;
 use League\CommonMark;
-
+use App\Http\Controllers\api\HashtagController;
+use Symfony\Component\HttpFoundation\Response;
 
 class PostsController extends Controller
 {
@@ -44,10 +46,23 @@ class PostsController extends Controller
 
         $validator = $this->validator($request->all());
         if(!$validator->fails()){
-            $post = $this->create($postData, $userData);
+
+            if (!$this->create($postData, $userData)){
+                return response()->json([
+                    'success' => false,
+                    'errors' => 'Failed to create Post'
+                ], 422);
+            }
+
+            $post = Post::latest()->first();
+
+            $tags = $this->createTags($post->id_r, $request->input('tags'));
+
             return response()->json([
-                'success' => true,
-                'data' => $post
+                'success' => 'true',
+                'post' => $post,
+                //'tags_s' => $post->id_r,
+                'tags' => $tags
             ], 200);
         }
         else{
@@ -78,7 +93,7 @@ class PostsController extends Controller
      */
     protected function create(array $data, object $user)
     {
-        $new_post = new Postlists;
+        $new_post = new Post;
 
         $new_post->id_r = Str::random(20);
         $new_post->user_id = $user->id;
@@ -87,15 +102,34 @@ class PostsController extends Controller
 
         return $new_post->save();
     }
+    /**
+     * Genera la lista dei post
+     *
+     * @param  Request  $request
+     * @return Response
+     */
 
-    public function show()
+    public function show(Request $request)
     {
-        return response()->json([
-            'success' => true,
-            'postData' => Postlists::orderBy('id', 'desc')->get(),
-            'voteData' => 'none'
-        ], 200);
-    }
+        if (request()->input('usertag'))
+        {
+            return response()->json([
+                'success' => true,
+                'postData' => Post::orderBy('id', 'desc')
+                    ->where('user_name', request()->input('usertag'))
+                    ->get(),
+                'voteData' => 'none'
+            ], 200);
+        }
+        else{
+            return response()->json([
+                'success' => true,
+                'postData' => Post::orderBy('id', 'desc')->get(),
+                'voteData' => 'none'
+            ], 200);
+        }
+        }
+
 
     public function updatePost(Request $request)
     {
@@ -112,7 +146,7 @@ class PostsController extends Controller
 
     protected function updatePostDB(array $data)
     {
-        return Postlists::where('id_r', $data['id'])
+        return Post::where('id_r', $data['id'])
             ->update(['message' => $data['update']]);
     }
 
@@ -199,10 +233,76 @@ class PostsController extends Controller
 
     }
 
-    public function testTags() 
+    public function allVotes(Request $request)
     {
+        $upVotes = Votes::where('vote_type', '1')
+            ->get();
+        $downVotes = Votes::where('vote_type', '0')
+            ->get();
 
+        return response()->json([
+            'success' => true,
+            'up_votes' => $upVotes,
+            'down_votes' => $downVotes
+        ]);
+    }
+
+    protected function createTags(string $post_id, array $tags = [])
+    {
+        $validationErr = [];
+
+        if(count($tags)){
+            $validTags = 0;
+            //Aggiunge nuovi hashtags
+            foreach($tags as $tag){
+                $validate = [
+                    'name' => $tag
+                ];
+
+                !$this->tagValidator($validate)->fails() ?
+                $this->tagCreate($tag) //$validTags++ 
+                : array_push($validationErr, $this->tagValidator($validate)->errors());
+            }
+            //relaziona post e tags
+            $tags = Tags::whereIn('name', $tags)->get();
+
+            foreach ($tags as $tag) {
+                $tag->post()->attach($post_id);
+            }
+
+            return [
+                'post' => $post_id,
+                'tags' => $validTags,
+                'err' => $validationErr
+            ];
+        }
+        else{
+            return [
+                'post' => $post_id,
+                'tags' => 'false'
+            ];
+        }
+        return [
+            'post' => $post_id,
+            'tags' => $tags
+        ];
+        
+    }
+
+    protected function tagCreate(string $data) {
+        $new_tag = new Tags;
+
+        $new_tag->name = $data;
+        $new_tag->type = 'hashtag';
+
+        return $new_tag->save();
 
     }
 
+    protected function tagValidator(array $data)
+    {
+        return Validator::make($data, [
+            'name'=> ['required', 'string', 'max:255', 'unique:Tags'],
+        ]);
+    }
 }

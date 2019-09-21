@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Post;
+
 
 class Tags extends Model
 {
     protected $table = 'tags';
 
-    public function tag_post_relationship()
+    public function post()
     {
-        return $this->belongsTo(Tag_post_relationship::class);
+        return $this->belongsToMany(Post::class)->withTimestamps();
     }
 }
